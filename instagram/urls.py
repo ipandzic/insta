@@ -27,7 +27,7 @@ urlpatterns = [
     path('', include('django.contrib.auth.urls')),
     path('profiles/', include(('accounts.urls', 'accounts'), namespace='profiles')),
     path('post/', include(('core.urls', 'core'), namespace='post')),
-    path('api/', include(('core.urls', 'core'), namespace='post-api')),
+    path('api/post/', include(('core.api.urls', 'core-api'), namespace='post-api')),
     path('register/', UserRegisterView.as_view(), name='register'),
 ]
 
