@@ -1,55 +1,88 @@
 {% extends "base.html" %}
 
+{% block script %}
+<script>
+    $(document).ready(function() {
+        console.log("working");
+
+
+        $.ajax({
+            url: "/api/post/",
+            method: "GET",
+            success: function (data) {
+                console.log(data)
+                $.each(data.results, function(key, value) {
+                    var postKey = key;
+                    var postContent = value.content;
+                    var postUser = value.user;
+                    $("#post-container").append(
+                        "<li>" + postContent + "</li>"
+                    )
+                })
+            },
+            error: function (data) {
+                console.log("error")
+                console.log(data)
+            }
+        })
+
+    });
+</script>
+
+{% endblock script %}
 
 {% block content %}
+<div id='post-container'>
 
 
+</div>
 
-    <div class="row">
-        <div class ="col-sm-3">
-            <h1>{{ request.user }}</h1>
-        </div>
-        <div class ="col-sm-9 col-sm-offest-3">
-            <div>
+
+<div class="row">
+    <div class="col-sm-3">
+        <h1>{{ request.user }}</h1>
+    </div>
+    <div class="col-sm-9 col-sm-offest-3">
+        <div>
             {% if not request.GET.get.q %}
 
 
             {% include "core/form.html" with form=create_form action_url=create_url btn_title="Post" %}
-                
+
+        </div>
+        <hr />
+
+        {% endif %}
+        {% for object in object_list %}
+
+        <div class="media">
+            <div class="media-left">
             </div>
-            <hr/>
 
-            {% endif %}
-            {% for object in object_list %}
-
-            <div class="media">
-              <div class="media-left">
-              </div>
-
-              <div class="media-body">
+            <div class="media-body">
                 <h4 class="media-heading">{{ object.content }}</h4>
 
-                Post by: <a href="profiles/{{ object.user }}">{{ object.user }}</a><br/>
+                Post by: <a href="profiles/{{ object.user }}">{{ object.user }}</a><br />
                 Post time: {{ object.timestamp }}
                 | <a href="{{ object.get_absolute_url }}">View</a>
                 </p>
 
-              </div>
             </div>
-                <hr/>
+        </div>
+        <hr />
 
 
 
         {% empty %}
-            {% if request.GET.q %}
-            <p>Not posts found.</p>
-            {% else %}
+        {% if request.GET.q %}
+        <p>Not posts found.</p>
+        {% else %}
 
-            <p>Not posts yet.</p>
-            {% endif %}
+        <p>Not posts yet.</p>
+        {% endif %}
 
         {% endfor %}
-        </div>
     </div>
+</div>
 
 {% endblock content %}
