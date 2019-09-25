@@ -6,9 +6,12 @@ from core.models import Post
 
 
 class PostModelSerializer(serializers.ModelSerializer):
-    user = UserDisplaySerializer()
+    user = UserDisplaySerializer(read_only=True)
     timesince = serializers.SerializerMethodField()
     date_display = serializers.SerializerMethodField()
+
+    def perform_create(self, serializer):
+        serializers.save(user=self.request.user)
 
     class Meta:
         model = Post

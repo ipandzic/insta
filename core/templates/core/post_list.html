@@ -2,28 +2,78 @@
 
 {% block script %}
 <script>
+
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+
     $(document).ready(function() {
         console.log("working");
 
+        var query = getParameterByName('q')
+        var tweetList = []
 
-        $.ajax({
-            url: "/api/post/",
-            method: "GET",
-            success: function (data) {
-                console.log(data)
-                $.each(data.results, function(key, value) {
+        function parsePosts(){
+            if (postList == 0) {
+                $("post-container").text("No posts currenty found.")
+            } else {
+            $.each(postList.results, function(key, value) {
                     var postKey = key;
                     var postContent = value.content;
                     var postUser = value.user;
                     $("#post-container").append(
-                        "<li>" + postContent + "</li>"
+                        "<div class=\"media\"><div class=\"madia-body\">" + postContent + "<br/> via " 
+                        + postUser.username + " | " + "<a href='#'>View</a>" + "</div></div><hr/>"
                     )
                 })
+            }
+        }
+
+
+        function fetchPosts(){
+            console.log("fetching...")
+            $.ajax({
+            url: "/api/post/",
+            data: {
+                "q": query
+            },
+            method: "GET",
+            success: function (data) {
+                postList = data
+                parsePosts()
             },
             error: function (data) {
                 console.log("error")
                 console.log(data)
             }
+        })
+        }
+        fetchPosts()
+
+        $("#post-form").submit(function(event){
+            event.preventDefault()
+            var this_ = $(this)
+            var formData = this_.serialize()
+
+            $.ajax({
+                url: "/api/post/create/",
+                data: formData,
+                method: "POST",
+                success: function (data) {
+                    fetchPosts()
+                },
+                error: function (data) {
+                    console.log("error")
+                    console.log(data)
+                }
+            })
+            
         })
 
     });
@@ -47,12 +97,23 @@
             {% if not request.GET.get.q %}
 
 
-            {% include "core/form.html" with form=create_form action_url=create_url btn_title="Post" %}
+            {% include "core/form.html" with form=create_form action_url=create_url btn_title="Post" form_id='post-form' %}
 
         </div>
         <hr />
 
         {% endif %}
+
+
+
+        <div id='post-container'>
+
+
+
+        </div>
+
+
+
         {% for object in object_list %}
 
         <div class="media">

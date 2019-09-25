@@ -3,6 +3,8 @@ from django.urls import reverse_lazy
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
 
+from django.db.models import Q
+
 from .forms import PostModelForm
 from .mixins import FormUserNeededMixin, UserOwnerMixin
 from .models import Post
@@ -19,14 +21,27 @@ class PostDetailView(DetailView):
 
 
 class PostListView(LoginRequiredMixin, ListView):
-    queryset = Post.objects.all()
-    template_name = "core/post_list.html"
+    
+    #template_name = "core/post_list.html"
 
-    def get_queryset(self):
-        im_following = self.request.user.profile.get_following()
-        qs1 = Post.objects.filter(user__in=im_following)
-        qs2 = Post.objects.filter(user=self.request.user)
-        qs = (qs1 | qs2).distinct()
+    # def get_queryset(self):
+    #     queryset = Post.objects.all()
+    #     im_following = self.request.user.profile.get_following()
+    #     qs1 = Post.objects.filter(user__in=im_following)
+    #     qs2 = Post.objects.filter(user=self.request.user)
+    #     qs = (qs1 | qs2).distinct()
+    #     return qs
+
+    def get_queryset(self, *args, **kwargs):
+        qs = Post.objects.all()
+        print(self.request.GET)
+        query = self.request.GET.get("q", None)
+
+        if query is not None:
+            qs = qs.filter(
+                Q(content__icontains=query) | 
+                Q(user__username__icontains=query)
+            )
         return qs
 
     def get_context_data(self, *args, **kwargs):
