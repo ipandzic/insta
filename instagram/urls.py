@@ -19,15 +19,12 @@ from django.contrib import admin
 from django.urls import include, path
 
 from accounts.views import UserRegisterView
-from core.views import PostListView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',  PostListView.as_view(), name='home'),
     path('', include('django.contrib.auth.urls')),
     path('profiles/', include(('accounts.urls', 'accounts'), namespace='profiles')),
-    path('post/', include(('core.urls', 'core'), namespace='post')),
-    path('api/post/', include(('core.api.urls', 'core-api'), namespace='post-api')),
+    path('post/', include(('core.urls', 'core-api'), namespace='post-api')),
     path('register/', UserRegisterView.as_view(), name='register'),
 ]
 

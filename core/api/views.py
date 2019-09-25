@@ -24,3 +24,11 @@ class PostListAPIView(generics.ListAPIView):
                 Q(user__username__icontains=query)
             )
         return qs
+
+
+class PostActionsAPIView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Get, Delete or Modify Post.
+    """
+    serializer_class = PostModelSerializer
+    queryset = Post.objects.all()
