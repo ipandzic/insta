@@ -1,11 +1,13 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
+from rest_framework import generics, permissions
 from django.views.generic import DetailView
 from django.views.generic.edit import FormView
+from .serializers import UserModelSerializer
 
 from .forms import UserRegisterForm
-from .models import UserProfile
+from .models import User
 
 User = get_user_model()
 
@@ -49,3 +51,31 @@ class UserFollowView(View):
         if request.user.is_authenticated:
             is_following = UserProfile.objects.toggle_follow(request.user, toggle_user)
         return redirect("profiles:detail", username=username)
+
+
+class UserCreateAPIView(generics.CreateAPIView):
+    serializer_class = UserModelSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class UserListAPIView(generics.ListAPIView):
+    serializer_class = UserModelSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        qs = User.objects.all()
+        print(self.request.GET)
+        query = self.request.GET.get("q", None)
+
+        if query is not None:
+            qs = qs.filter(
+                Q(content__icontains=query) | 
+                Q(user__username__icontains=query)
+            )
+        return qs
+
+
+class UserActionsAPIView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Get, Delete or Modify User.
+    """
+    serializer_class = UserModelSerializer
+    queryset = User.objects.all()

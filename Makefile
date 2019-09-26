@@ -8,3 +8,6 @@ migrate:
 
 test:
 	python manage.py test
+
+super:
+	python manage.py createsuperuser

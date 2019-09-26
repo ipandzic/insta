@@ -24,3 +24,20 @@ class UserDisplaySerializer(serializers.ModelSerializer):
 
     def get_url(self, obj):
         return reverse_lazy("profiles:detail", kwargs={"username": obj.username })
+
+class UserModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'last_login',
+            'is_superuser',
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'is_staff',
+            'is_active',
+            'date_joined'
+        ]
